@@ -30,10 +30,12 @@ pkg/sse/writer.go           → Server-Sent Events response writer
 
 ### Claude CLI Invocation
 
-- Non-streaming: `claude -p --output-format json "<prompt>"`
-- Streaming: `claude -p --output-format stream-json --verbose --include-partial-messages "<prompt>"`
+- Non-streaming: `echo "<prompt>" | claude -p --output-format json --allowedTools WebFetch,WebSearch`
+- Streaming: `echo "<prompt>" | claude -p --output-format stream-json --verbose --include-partial-messages --allowedTools WebFetch,WebSearch`
 
+The prompt is passed via stdin because `--allowedTools` is a variadic flag that would consume positional arguments.
 The `--include-partial-messages` flag is required for true token-by-token streaming.
+The `--allowedTools` flag enables Claude to use web tools (WebFetch, WebSearch) for retrieving online content.
 
 ### Stream Event Flow
 

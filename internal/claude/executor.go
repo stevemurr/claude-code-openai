@@ -21,7 +21,12 @@ func NewExecutor(claudePath string) *Executor {
 
 // ExecuteRequest executes a non-streaming request
 func (e *Executor) ExecuteRequest(ctx context.Context, prompt string) (*JSONResponse, error) {
-	cmd := exec.CommandContext(ctx, e.claudePath, "-p", "--output-format", "json", prompt)
+	cmd := exec.CommandContext(ctx, e.claudePath, "-p",
+		"--output-format", "json",
+		"--allowedTools", "WebFetch,WebSearch")
+
+	// Pass prompt via stdin to avoid issues with variadic --allowedTools flag
+	cmd.Stdin = strings.NewReader(prompt)
 
 	output, err := cmd.Output()
 	if err != nil {
@@ -44,7 +49,13 @@ type StreamCallback func(event *StreamEvent) error
 
 // ExecuteStreamingRequest executes a streaming request
 func (e *Executor) ExecuteStreamingRequest(ctx context.Context, prompt string, callback StreamCallback) error {
-	cmd := exec.CommandContext(ctx, e.claudePath, "-p", "--output-format", "stream-json", "--verbose", "--include-partial-messages", prompt)
+	cmd := exec.CommandContext(ctx, e.claudePath, "-p",
+		"--output-format", "stream-json",
+		"--verbose", "--include-partial-messages",
+		"--allowedTools", "WebFetch,WebSearch")
+
+	// Pass prompt via stdin to avoid issues with variadic --allowedTools flag
+	cmd.Stdin = strings.NewReader(prompt)
 
 	stdout, err := cmd.StdoutPipe()
 	if err != nil {
